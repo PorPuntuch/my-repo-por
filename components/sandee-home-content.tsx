@@ -1,91 +1,95 @@
 "use client"
 
 import { useState } from "react"
-import { Send } from "lucide-react"
+import { MessageSquare, Plus, BookOpen, Clock } from "lucide-react"
 import { DynamicReadingButton } from "./dynamic-reading-button"
-
-interface Book {
-  id: number
-  title: string
-  author: string
-  currentPage: number
-  totalPages: number
-  coverColor: string
-  goalTitle: string
-}
+import { BookSelectionModal } from "./book-selection-modal"
 
 export function SandeeHomeContent() {
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      content: "Good morning! 🌟 I'm your daily reading coach. How are you feeling about your reading goals today?",
-      sender: "ai" as const,
-    },
-    {
-      id: "2",
-      content:
-        "Remember, consistency beats perfection. Even 5 minutes of reading today will keep your momentum going! 💪",
-      sender: "ai" as const,
-    },
-    {
-      id: "3",
-      content: "I see you have a reading session scheduled for 8:00 PM today. I'll remind you when it's time! 📚",
-      sender: "ai" as const,
-    },
-  ])
-  const [inputValue, setInputValue] = useState("")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedBook, setSelectedBook] = useState(null)
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return
-
-    const userMessage = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: "user" as const,
+  const handleStartReadingClick = (status) => {
+    if (status === "off-schedule") {
+      setIsModalOpen(true)
+    } else {
+      // Handle scheduled session start
+      console.log("Starting scheduled session...")
+      // Simulate AI response for scheduled session
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          type: "ai",
+          text: "Great! Let's start your scheduled reading session. Focus and enjoy!",
+        },
+      ])
     }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
-
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = [
-        "That's wonderful! I'm here to support you every step of the way. Let's make today count! 🌟",
-        "I love your enthusiasm! Remember, every page you read is progress toward your goals. 📖",
-        "You're building an amazing habit! Keep up the great work and stay consistent. 💪",
-        "Perfect mindset! Let's turn that motivation into action. Your future self will thank you! ✨",
-      ]
-
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
-        content: responses[Math.floor(Math.random() * responses.length)],
-        sender: "ai" as const,
-      }
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1000)
   }
 
-  const handleStartReading = (sessionType: "scheduled" | "off-schedule" | "no-goals", goal?: any, book?: Book) => {
-    console.log("Starting reading session:", sessionType, goal, book)
+  const handleBookSelect = (book) => {
+    setSelectedBook(book)
+    setIsModalOpen(false)
+    // Simulate AI response for off-schedule session with selected book
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        type: "ai",
+        text: `Excellent choice! Starting an off-schedule session with "${book.title}". Remember, every page counts!`,
+      },
+    ])
+  }
 
-    // Add AI response based on session type
+  const [messages, setMessages] = useState([
+    {
+      type: "ai",
+      text: "Good morning! 🌟 I'm your daily reading coach. How are you feeling about your reading goals today?",
+    },
+    {
+      type: "ai",
+      text: "Remember, consistency beats perfection. Even 5 minutes of reading today will keep your momentum going! 💪",
+    },
+    {
+      type: "ai",
+      text: "Your next reading session for 'Atomic Habits' is coming up at 8:00 PM. I'll remind you when it's time! 📚",
+    },
+  ])
+  const [inputMessage, setInputMessage] = useState("")
+
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      setMessages((prevMessages) => [...prevMessages, { type: "user", text: inputMessage }])
+      setInputMessage("")
+      // Simulate AI response
+      setTimeout(() => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            type: "ai",
+            text: "That's wonderful! I'm here to support you every step of the way. Let's make today count! 🌟",
+          },
+        ])
+      }, 1000)
+    }
+  }
+
+  const handleSuggestedAction = (actionType) => {
     let aiResponse = ""
-
-    if (sessionType === "scheduled") {
-      aiResponse = `Great! Starting your scheduled session for "${goal?.bookTitle}". This will count toward your streak! 🎯`
-    } else if (sessionType === "off-schedule" && book) {
-      aiResponse = `Perfect choice! Let's dive into "${book.title}" by ${book.author}. You're currently on page ${book.currentPage}. Every page counts! 📚`
-    } else if (sessionType === "no-goals") {
-      aiResponse = "Let's set up your first reading goal! What book would you like to start with? ✨"
+    switch (actionType) {
+      case "reschedule":
+        aiResponse = "Of course! Let's find a better time for your reading session. What time works best for you?"
+        break
+      case "create-goal":
+        aiResponse =
+          "That's a great idea! Let's set up a new reading goal. What book are you planning to read, and when would you like to read it?"
+        break
+      case "summarize-reading":
+        aiResponse =
+          "I'd love to help you reflect! What have you read today, and what were your key takeaways or thoughts?"
+        break
+      default:
+        aiResponse = "How can I assist you further?"
     }
-
-    const aiMessage = {
-      id: Date.now().toString(),
-      content: aiResponse,
-      sender: "ai" as const,
-    }
-
-    setMessages((prev) => [...prev, aiMessage])
+    setMessages((prevMessages) => [...prevMessages, { type: "ai", text: aiResponse }])
   }
 
   return (
@@ -99,56 +103,76 @@ export function SandeeHomeContent() {
       <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "var(--shadow-sm)" }}>
         <div className="flex items-center gap-3 mb-6 text-lg font-semibold text-gray-900">
           <div
-            className="w-6 h-6 rounded-md flex items-center justify-center text-white"
+            className="w-6 h-6 rounded-md flex items-center justify-center text-white text-base"
             style={{ backgroundColor: "var(--primary-green)" }}
           >
             🤖
           </div>
           <span>Your Daily Coach</span>
         </div>
-
-        <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
-          {messages.map((message) => (
-            <div key={message.id} className="flex items-start gap-3">
+        <div className="flex flex-col gap-4">
+          {messages.map((msg, index) => (
+            <div key={index} className="flex items-start gap-3">
               <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  message.sender === "ai"
-                    ? "bg-[var(--primary-green-soft)] text-[var(--primary-green)]"
-                    : "bg-gray-100 text-gray-600"
-                }`}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0"
+                style={{
+                  backgroundColor: msg.type === "ai" ? "var(--primary-green-soft)" : "var(--netflix-off-white)",
+                  color: msg.type === "ai" ? "var(--primary-green)" : "#6B7280",
+                }}
               >
-                {message.sender === "ai" ? "🤖" : "👤"}
+                {msg.type === "ai" ? "🤖" : "👤"}
               </div>
-              <div className="flex-1 text-[15px] leading-relaxed text-gray-700">{message.content}</div>
+              <div className="flex-1 text-sm leading-relaxed text-gray-700">{msg.text}</div>
             </div>
           ))}
         </div>
 
-        <div className="relative">
+        {/* Suggested Actions */}
+        <div className="grid grid-cols-3 gap-2 mt-6">
+          <button
+            className="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 rounded-2xl text-blue-500 font-medium text-sm hover:bg-gray-200 transition-colors"
+            onClick={() => handleSuggestedAction("reschedule")}
+          >
+            <Clock className="w-5 h-5 mb-1" />
+            Reschedule
+          </button>
+          <button
+            className="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 rounded-2xl text-blue-500 font-medium text-sm hover:bg-gray-200 transition-colors"
+            onClick={() => handleSuggestedAction("create-goal")}
+          >
+            <Plus className="w-5 h-5 mb-1" />
+            Create new goal
+          </button>
+          <button
+            className="flex flex-col items-center justify-center px-4 py-3 bg-gray-100 rounded-2xl text-blue-500 font-medium text-sm hover:bg-gray-200 transition-colors"
+            onClick={() => handleSuggestedAction("summarize-reading")}
+          >
+            <BookOpen className="w-5 h-5 mb-1" />
+            Summarize reading
+          </button>
+        </div>
+
+        <div className="mt-6 relative">
           <input
             type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            className="w-full py-3 px-4 pr-12 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500"
             placeholder="Share your thoughts or ask for motivation..."
-            className="w-full py-4 px-4 pr-12 border border-gray-200 rounded-xl text-[15px] bg-white focus:outline-none focus:border-[var(--primary-green)] transition-colors"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
           />
           <button
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-green-500 text-white rounded-lg flex items-center justify-center hover:bg-green-600 transition-colors"
             onClick={handleSendMessage}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-white transition-colors"
-            style={{
-              backgroundColor: "var(--primary-green)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--primary-green-dark)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--primary-green)")}
           >
-            <Send className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {/* Dynamic Reading Button */}
-      <DynamicReadingButton onStartReading={handleStartReading} />
+      <DynamicReadingButton onStartReading={handleStartReadingClick} />
+
+      <BookSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectBook={handleBookSelect} />
     </div>
   )
 }
