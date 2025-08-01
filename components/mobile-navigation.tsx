@@ -7,48 +7,48 @@ interface MobileNavigationProps {
   onTabChange: (tab: string) => void
 }
 
-const navigation = [
-  {
-    id: "dashboard",
-    title: "หน้าหลัก",
-    icon: Home,
-  },
-  {
-    id: "goals",
-    title: "เป้าหมาย",
-    icon: Target,
-  },
-  {
-    id: "achievements",
-    title: "ความสำเร็จ",
-    icon: Trophy,
-  },
-]
-
 export function MobileNavigation({ activeTab, onTabChange }: MobileNavigationProps) {
+  const navItems = [
+    {
+      id: "home",
+      label: "Home",
+      icon: Home,
+    },
+    {
+      id: "goals",
+      label: "Goals",
+      icon: Target,
+    },
+    {
+      id: "achievements",
+      label: "Achievements",
+      icon: Trophy,
+    },
+  ]
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-pb">
-      <div className="flex justify-around items-center">
-        {navigation.map((item) => {
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 max-w-md mx-auto safe-area-pb">
+      <div className="flex justify-around py-2">
+        {navItems.map((item) => {
+          const Icon = item.icon
           const isActive = activeTab === item.id
-          const IconComponent = item.icon
 
           return (
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors ${
-                isActive ? "text-emerald-600 bg-emerald-50" : "text-gray-500 hover:text-gray-700"
+              className={`flex flex-col items-center gap-1 py-3 px-4 rounded-lg transition-all duration-200 min-w-[44px] min-h-[44px] ${
+                isActive
+                  ? "text-[#4CAF50] bg-green-50 transform scale-105"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 active:scale-95"
               }`}
             >
-              <IconComponent className={`w-6 h-6 mb-1 ${isActive ? "text-emerald-600" : "text-gray-500"}`} />
-              <span className={`text-xs font-medium ${isActive ? "text-emerald-600" : "text-gray-500"}`}>
-                {item.title}
-              </span>
+              <Icon className="w-6 h-6" />
+              <span className="text-xs font-medium">{item.label}</span>
             </button>
           )
         })}
       </div>
-    </div>
+    </nav>
   )
 }

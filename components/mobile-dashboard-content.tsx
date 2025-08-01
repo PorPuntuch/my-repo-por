@@ -1,131 +1,207 @@
 "use client"
 
 import { useState } from "react"
+import { Plus, BookOpen, Clock, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { TimerPopup } from "@/components/timer-popup"
-import { Timer, Bot, Send } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { BookSelectionModal } from "./book-selection-modal"
+
+interface Message {
+  id: number
+  type: "ai" | "user"
+  text: string
+  timestamp: Date
+}
 
 export function MobileDashboardContent() {
-  const [showTimer, setShowTimer] = useState(false)
-  const [chatInput, setChatInput] = useState("")
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
-      id: "1",
-      content: "สวัสดีครับ! 🌟 ผมเป็นโค้ชการอ่านของคุณ วันนี้รู้สึกยังไงกับเป้าหมายการอ่านบ้างครับ?",
-      sender: "ai" as const,
+      id: 1,
+      type: "ai",
+      text: "Good morning! 🌟 Remember, consistency beats perfection. Even 5 minutes of reading today will keep your momentum going!",
+      timestamp: new Date(),
     },
     {
-      id: "2",
-      content: "จำไว้นะครับ ความสม่ำเสมอสำคัญกว่าความสมบูรณ์แบบ แค่อ่าน 5 นาทีวันนี้ก็ช่วยรักษาโมเมนตัมได้แล้ว! 📚",
-      sender: "ai" as const,
+      id: 2,
+      type: "ai",
+      text: "You have a reading session for 'Atomic Habits' scheduled at 8:00 PM today. I'll remind you when it's time! 📚",
+      timestamp: new Date(),
+    },
+    {
+      id: 3,
+      type: "ai",
+      text: "Your 5-day reading streak is impressive! Let's make it 6 days today. What book are you excited to read?",
+      timestamp: new Date(),
     },
   ])
 
-  const handleSendMessage = () => {
-    if (!chatInput.trim()) return
+  const [inputMessage, setInputMessage] = useState("")
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false)
+  const [showBookModal, setShowBookModal] = useState(false)
 
-    const userMessage = {
-      id: Date.now().toString(),
-      content: chatInput,
-      sender: "user" as const,
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      const newMessage: Message = {
+        id: messages.length + 1,
+        type: "user",
+        text: inputMessage,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, newMessage])
+      setInputMessage("")
+
+      // Simulate AI response
+      setTimeout(() => {
+        const aiResponse: Message = {
+          id: messages.length + 2,
+          type: "ai",
+          text: "That's wonderful! I'm here to support you every step of the way. Let's make today count! 🌟",
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, aiResponse])
+      }, 1000)
+    }
+  }
+
+  const handleActionButton = (action: "reschedule" | "create-goal" | "summarize") => {
+    let aiResponse = ""
+    switch (action) {
+      case "reschedule":
+        aiResponse =
+          "Of course! Let's find a better time for your reading session. What time works best for you today? ⏰"
+        break
+      case "create-goal":
+        aiResponse =
+          "Excellent idea! Let's set up a new reading goal. What book would you like to read, and how many minutes per day? 🎯"
+        break
+      case "summarize":
+        aiResponse = "I'd love to help you reflect! What have you read recently, and what were your key takeaways? 📝"
+        break
     }
 
-    setMessages((prev) => [...prev, userMessage])
-    setChatInput("")
+    const newMessage: Message = {
+      id: messages.length + 1,
+      type: "ai",
+      text: aiResponse,
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, newMessage])
+  }
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = [
-        "เยี่ยมมากครับ! จำไว้ว่าทุกหน้าที่อ่านคือความก้าวหน้าสู่เป้าหมาย 🎯",
-        "ชอบทัศนคติแบบนี้! การกระทำเล็ก ๆ ที่สม่ำเสมอนำไปสู่ผลลัพธ์ใหญ่ 💪",
-        "คุณกำลังสร้างนิสัยที่ยอดเยี่ยม! ตัวเองในอนาคตจะขอบคุณสำหรับความมุ่งมั่นนี้ ✨",
-      ]
+  const handleStartReading = () => {
+    setIsBookModalOpen(true)
+  }
 
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
-        content: responses[Math.floor(Math.random() * responses.length)],
-        sender: "ai" as const,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1000)
+  const handleBookSelect = (book: { title: string; author: string }) => {
+    setIsBookModalOpen(false)
+    const aiResponse: Message = {
+      id: messages.length + 1,
+      type: "ai",
+      text: `Perfect choice! Starting a free reading session with "${book.title}". Remember, every page counts toward your progress! 🚀`,
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, aiResponse])
   }
 
   return (
-    <div className="pb-20 px-4 space-y-4">
-      {/* AI Chat Card */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Bot className="w-5 h-5 text-emerald-600" />
-            <span className="font-semibold text-gray-800">โค้ชส่วนตัว</span>
-          </div>
-
-          <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
+    <div className="pt-20 pb-20 px-4 space-y-6 max-w-md mx-auto">
+      {/* Daily Coach Card */}
+      <Card className="bg-white shadow-sm border-0" style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
+        <CardContent className="p-5">
+          {/* Coach Messages */}
+          <div className="space-y-4 mb-5 max-h-64 overflow-y-auto">
             {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={message.id} className="flex items-start gap-3">
                 <div
-                  className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                    message.sender === "ai" ? "bg-gray-100 text-gray-800" : "bg-emerald-500 text-white"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    message.type === "ai" ? "bg-green-100 text-[#4CAF50]" : "bg-gray-100 text-gray-600"
                   }`}
                 >
-                  {message.content}
+                  {message.type === "ai" ? "🤖" : "👤"}
+                </div>
+                <div className="flex-1">
+                  <p className="text-gray-700 leading-relaxed text-sm">{message.text}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-2">
+          {/* Action Buttons */}
+          <div className="grid grid-cols-3 gap-2 mb-5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex flex-col items-center gap-1 h-auto py-3 px-2 text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent text-xs"
+              onClick={() => handleActionButton("reschedule")}
+            >
+              <Clock className="w-4 h-4" />
+              <span className="font-medium">Reschedule</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex flex-col items-center gap-1 h-auto py-3 px-2 text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent text-xs"
+              onClick={() => handleActionButton("create-goal")}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="font-medium">New Goal</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex flex-col items-center gap-1 h-auto py-3 px-2 text-blue-600 border-blue-200 hover:bg-blue-50 bg-transparent text-xs"
+              onClick={() => handleActionButton("summarize")}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="font-medium">Summarize</span>
+            </Button>
+          </div>
+
+          {/* Input Field */}
+          <div className="relative">
             <Input
-              placeholder="แชร์ความคิดหรือขอกำลังใจ..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
+              type="text"
+              placeholder="Share your thoughts or ask for motivation..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              className="flex-1 text-sm"
+              className="pr-12 py-3 text-sm border-gray-200 focus:border-[#4CAF50] focus:ring-[#4CAF50]"
             />
-            <Button onClick={handleSendMessage} size="sm" className="bg-emerald-500 hover:bg-emerald-600 px-3">
+            <Button
+              size="sm"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 p-0 bg-[#4CAF50] hover:bg-[#45a049]"
+              onClick={handleSendMessage}
+            >
               <Send className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Reading Session Button */}
+      {/* Free Reading Section */}
       <Card>
-        <CardContent className="p-6 text-center">
-          <div className="mb-4">
-            <Timer className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
-            <h3 className="font-semibold text-gray-800">เริ่มอ่านหนังสือ</h3>
-            <p className="text-sm text-gray-600">เซสชั่น 10 นาที</p>
-          </div>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">📖 Free Reading</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600 text-sm">Start a reading session without any specific goal or timer.</p>
           <Button
-            onClick={() => setShowTimer(true)}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 py-3 text-base font-medium"
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3"
+            onClick={() => setShowBookModal(true)}
           >
-            เริ่มอ่านเลย
+            Start Reading Now
           </Button>
         </CardContent>
       </Card>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-emerald-600">7</div>
-            <div className="text-xs text-gray-600">วันติดต่อกัน</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">3</div>
-            <div className="text-xs text-gray-600">หนังสือจบแล้ว</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <TimerPopup isOpen={showTimer} onClose={() => setShowTimer(false)} />
+      {/* Book Selection Modal */}
+      <BookSelectionModal
+        isOpen={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+        onSelectBook={handleBookSelect}
+      />
+      <BookSelectionModal isOpen={showBookModal} onClose={() => setShowBookModal(false)} />
     </div>
   )
 }

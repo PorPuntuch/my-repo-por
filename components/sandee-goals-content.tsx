@@ -1,65 +1,316 @@
 "use client"
 
-import { BookOpen } from "lucide-react"
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  BookOpen,
+  Clock,
+  Calendar,
+  Flame,
+  Flag,
+  Play,
+  FileText,
+  MoreHorizontal,
+  Plus,
+  Edit,
+  Trash2,
+} from "lucide-react"
+import { ChangeScheduleModal } from "./change-schedule-modal"
 
-const goals = [
+interface Goal {
+  id: number
+  title: string
+  bookTitle: string
+  bookAuthor: string
+  duration: number
+  durationUnit: "minutes" | "hours"
+  days: string[]
+  preferredTime?: string
+  status: "active" | "paused"
+  streak: number
+  daysLeft: number
+  weeklyProgress: { completed: number; total: number }
+}
+
+const mockGoals: Goal[] = [
   {
     id: 1,
-    title: "Read 10 minutes daily",
-    description: "Build a consistent daily reading habit",
-    progress: 33,
+    title: "Daily Reading Habit",
+    bookTitle: "Atomic Habits",
+    bookAuthor: "James Clear",
+    duration: 30,
+    durationUnit: "minutes",
+    days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    preferredTime: "20:00",
+    status: "active",
+    streak: 5,
+    daysLeft: 12,
+    weeklyProgress: { completed: 4, total: 5 },
   },
   {
     id: 2,
-    title: "Finish 'Atomic Habits' book",
-    description: "Complete reading this productivity book",
-    progress: 72,
+    title: "Weekend Learning",
+    bookTitle: "Sapiens",
+    bookAuthor: "Yuval Noah Harari",
+    duration: 1,
+    durationUnit: "hours",
+    days: ["saturday", "sunday"],
+    status: "active",
+    streak: 3,
+    daysLeft: 8,
+    weeklyProgress: { completed: 2, total: 2 },
   },
   {
     id: 3,
-    title: "Read 30 minutes on weekends",
-    description: "Extended reading sessions on Saturday and Sunday",
-    progress: 60,
+    title: "Evening Stories",
+    bookTitle: "The Midnight Library",
+    bookAuthor: "Matt Haig",
+    duration: 45,
+    durationUnit: "minutes",
+    days: ["monday", "wednesday", "friday", "sunday"],
+    status: "paused",
+    streak: 0,
+    daysLeft: 15,
+    weeklyProgress: { completed: 0, total: 4 },
   },
 ]
 
 export function SandeeGoalsContent() {
-  // Changed to named export
+  const [goals, setGoals] = useState<Goal[]>(mockGoals)
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
+
+  const formatDays = (days: string[]) => {
+    const dayMap: { [key: string]: string } = {
+      monday: "Mon",
+      tuesday: "Tue",
+      wednesday: "Wed",
+      thursday: "Thu",
+      friday: "Fri",
+      saturday: "Sat",
+      sunday: "Sun",
+    }
+
+    if (days.length === 7) return "Daily"
+    if (days.length === 5 && !days.includes("saturday") && !days.includes("sunday")) return "Mon-Fri"
+    if (days.length === 2 && days.includes("saturday") && days.includes("sunday")) return "Sat-Sun"
+
+    return days.map((day) => dayMap[day]).join(", ")
+  }
+
+  const formatDuration = (duration: number, unit: "minutes" | "hours") => {
+    if (unit === "hours") {
+      return duration === 1 ? "1 hr/day" : `${duration} hrs/day`
+    }
+    return `${duration} min/day`
+  }
+
+  const handleCreateNewGoal = () => {
+    console.log("Creating new goal...")
+    // TODO: Open create new goal modal or navigate to creation flow
+  }
+
+  const handleEditSchedule = (goal: Goal) => {
+    setSelectedGoal(goal)
+    setIsScheduleModalOpen(true)
+  }
+
+  const handleSaveSchedule = (goalId: number, updates: Partial<Goal>) => {
+    setGoals((prev) => prev.map((goal) => (goal.id === goalId ? { ...goal, ...updates } : goal)))
+    setIsScheduleModalOpen(false)
+    setSelectedGoal(null)
+  }
+
+  const handleDeleteGoal = (goalId: number) => {
+    setGoals((prev) => prev.filter((goal) => goal.id !== goalId))
+  }
+
+  const handleStartReading = (goal: Goal) => {
+    console.log("Starting reading session for:", goal.title)
+    // Implement reading session logic
+  }
+
+  const handleViewNotes = (goal: Goal) => {
+    console.log("Viewing notes for:", goal.title)
+    // Implement notes viewing logic
+  }
+
   return (
-    <div className="pb-20 px-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Goals 🎯</h1>
-        <p className="text-gray-600">Simple goals, powerful results</p>
+    <div className="pb-20 px-6 space-y-6 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="text-center pt-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Reading Goals 🎯</h1>
+        <p className="text-gray-600 mb-6">Track your progress and build lasting habits</p>
       </div>
 
-      <div className="space-y-4">
-        {goals.map((goal) => (
-          <div key={goal.id} className="bg-white rounded-2xl p-6" style={{ boxShadow: "var(--shadow-sm)" }}>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{goal.title}</h3>
-            <p className="text-sm text-gray-600 mb-4">{goal.description}</p>
+      {/* Create New Goal Button - Top Placement */}
+      <div className="flex flex-col items-center mb-6">
+        <Button
+          onClick={handleCreateNewGoal}
+          className="bg-[#4CAF50] hover:bg-[#45a049] text-white font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          size="lg"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Create New Goal
+        </Button>
 
-            <div className="mb-2">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gray-900 rounded-full transition-all duration-300"
-                  style={{ width: `${goal.progress}%` }}
-                />
-              </div>
-            </div>
-            <div className="text-right text-sm text-gray-600 mb-4">{goal.progress}% complete</div>
+        {/* Microcopy */}
+        <p className="text-sm text-gray-500 mt-2 italic">Set a new reading goal to stay consistent 📚</p>
+      </div>
 
-            <button
-              className="w-full py-3.5 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
-              style={{ backgroundColor: "var(--primary-green)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--primary-green-dark)")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--primary-green)")}
+      {/* Goals List */}
+      {goals.length > 0 ? (
+        <div className="space-y-4">
+          {goals.map((goal) => (
+            <Card
+              key={goal.id}
+              className="border-2 border-blue-200 bg-white shadow-sm"
+              style={{ borderRadius: "16px" }}
             >
-              <BookOpen className="w-5 h-5" />
-              Start Reading
-            </button>
+              <CardContent className="p-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">{goal.title}</h3>
+                  <Badge
+                    variant={goal.status === "active" ? "default" : "secondary"}
+                    className={`${
+                      goal.status === "active"
+                        ? "bg-green-100 text-green-700 hover:bg-green-100"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {goal.status === "active" ? "Active" : "Paused"}
+                  </Badge>
+                </div>
+
+                {/* Book Info */}
+                <div className="flex items-center gap-3 mb-6">
+                  <BookOpen className="w-5 h-5 text-blue-600" />
+                  <span className="text-gray-700 font-medium">
+                    {goal.bookTitle} by {goal.bookAuthor}
+                  </span>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-purple-600" />
+                    <span className="text-gray-700">{formatDuration(goal.duration, goal.durationUnit)}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <span className="text-gray-700">{formatDays(goal.days)}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <span className="text-gray-700">{goal.streak} day streak</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Flag className="w-5 h-5 text-green-600" />
+                    <span className="text-gray-700">{goal.daysLeft} days left</span>
+                  </div>
+                </div>
+
+                {/* Weekly Progress */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-700 font-medium">Weekly Progress</span>
+                    <span className="text-[#4CAF50] font-semibold">
+                      {goal.weeklyProgress.completed}/{goal.weeklyProgress.total} days
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-[#4CAF50] h-3 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${(goal.weeklyProgress.completed / goal.weeklyProgress.total) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={() => handleStartReading(goal)}
+                    disabled={goal.status === "paused"}
+                    className="flex-1 bg-[#4CAF50] hover:bg-[#45a049] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Play className="w-4 h-4 mr-2" />📖 Start Reading
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => handleViewNotes(goal)}
+                    className="flex-1 border-gray-300 hover:bg-gray-50"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />📝 View Notes
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" className="border-gray-300 hover:bg-gray-50 bg-transparent">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditSchedule(goal)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Change Schedule
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDeleteGoal(goal.id)}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Goal
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-8 h-8 text-gray-400" />
           </div>
-        ))}
-      </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No reading goals yet</h3>
+          <p className="text-gray-600 mb-6">Create your first goal to start building a reading habit!</p>
+          <Button
+            onClick={handleCreateNewGoal}
+            className="bg-[#4CAF50] hover:bg-[#45a049] text-white font-semibold py-3 px-6 rounded-xl"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Create Your First Goal
+          </Button>
+        </div>
+      )}
+
+      {/* Floating Action Button */}
+      <Button
+        className="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-[#4CAF50] hover:bg-[#45a049] text-white shadow-lg z-40"
+        onClick={handleCreateNewGoal}
+      >
+        <Plus className="w-6 h-6" />
+      </Button>
+
+      {/* Change Schedule Modal */}
+      <ChangeScheduleModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => {
+          setIsScheduleModalOpen(false)
+          setSelectedGoal(null)
+        }}
+        goal={selectedGoal}
+        onSave={handleSaveSchedule}
+      />
     </div>
   )
 }
