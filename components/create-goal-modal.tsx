@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { BookOpen, Clock, CalendarIcon, ChevronLeft, ChevronRight, AlertCircle, Check, Search } from "lucide-react"
+import { BookOpen, Clock, CalendarIcon, ChevronLeft, ChevronRight, AlertCircle, Check, Search } from 'lucide-react'
 import { format } from "date-fns"
 
 interface Goal {
@@ -219,12 +219,12 @@ export function CreateGoalModal({ isOpen, onClose, onCreateGoal, existingGoals }
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md mx-auto h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4 border-b">
+        <DialogHeader className="p-5 pb-4 border-b">
           <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-[#4CAF50]" />
             Create New Goal
           </DialogTitle>
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-4">
             {[1, 2, 3].map((step) => (
               <div
                 key={step}
@@ -232,21 +232,21 @@ export function CreateGoalModal({ isOpen, onClose, onCreateGoal, existingGoals }
               />
             ))}
           </div>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-gray-600 mt-3">
             Step {currentStep} of 3:{" "}
             {currentStep === 1 ? "Book Selection" : currentStep === 2 ? "Reading Schedule" : "Goal Details"}
           </p>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 p-6">
+        <ScrollArea className="flex-1 p-5">
           {/* Step 1: Book Selection */}
           {currentStep === 1 && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div>
                 <Label htmlFor="book-search" className="text-base font-semibold text-gray-900">
                   📚 What book do you want to read?
                 </Label>
-                <div className="relative mt-2">
+                <div className="relative mt-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
@@ -339,7 +339,7 @@ export function CreateGoalModal({ isOpen, onClose, onCreateGoal, existingGoals }
                 <Label className="text-base font-semibold text-gray-900">
                   ⏰ How long do you want to read each day?
                 </Label>
-                <div className="grid grid-cols-2 gap-3 mt-3">
+                <div className="grid grid-cols-2 gap-4 mt-3">
                   {durationOptions.map((option) => (
                     <button
                       key={option.value}
@@ -388,7 +388,7 @@ export function CreateGoalModal({ isOpen, onClose, onCreateGoal, existingGoals }
 
               <div>
                 <Label className="text-base font-semibold text-gray-900">📅 Which days do you want to read?</Label>
-                <div className="grid grid-cols-7 gap-2 mt-3">
+                <div className="grid grid-cols-7 gap-3 mt-3">
                   {dayOptions.map((day) => (
                     <button
                       key={day.key}
@@ -586,8 +586,8 @@ export function CreateGoalModal({ isOpen, onClose, onCreateGoal, existingGoals }
         </ScrollArea>
 
         {/* Footer Buttons */}
-        <div className="p-6 border-t bg-white">
-          <div className="flex gap-3">
+        <div className="p-5 border-t bg-white">
+          <div className="flex gap-4">
             {currentStep > 1 && (
               <Button onClick={handleBack} variant="outline" className="flex-1 min-h-[44px] bg-transparent">
                 <ChevronLeft className="w-4 h-4 mr-2" />

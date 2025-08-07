@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, BookOpen, Clock, Send } from "lucide-react"
+import { Plus, BookOpen, Clock, Send } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -104,18 +104,18 @@ export function SandeeHomeContent() {
   }
 
   return (
-    <div className="pb-20 px-6 space-y-6 max-w-2xl mx-auto">
+    <div className="pb-24 px-4 space-y-8 max-w-2xl mx-auto">
       {/* Greeting Section */}
-      <div className="text-center pt-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Good Morning! 👋</h1>
+      <div className="text-center pt-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">Good Morning! 👋</h1>
         <p className="text-gray-600 text-lg">Ready to continue your reading journey today?</p>
       </div>
 
       {/* Daily Coach Card */}
       <Card className="bg-white shadow-sm border-0" style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
-        <CardContent className="p-6">
+        <CardContent className="p-5">
           {/* Coach Header */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-5">
             <div className="w-8 h-8 bg-[#4CAF50] rounded-lg flex items-center justify-center">
               <span className="text-white text-lg">🤖</span>
             </div>
@@ -123,7 +123,7 @@ export function SandeeHomeContent() {
           </div>
 
           {/* Coach Messages */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-5 mb-5">
             {messages.map((message) => (
               <div key={message.id} className="flex items-start gap-3">
                 <div
@@ -141,7 +141,7 @@ export function SandeeHomeContent() {
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="mb-5 grid grid-cols-3 gap-3">
             <Button
               variant="outline"
               size="sm"
@@ -195,7 +195,7 @@ export function SandeeHomeContent() {
       {/* Free Reading Section */}
       <div className="space-y-4">
         {/* Section Tag */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
           <span className="text-gray-500 font-medium">Free Reading Time</span>
         </div>
@@ -203,7 +203,7 @@ export function SandeeHomeContent() {
         {/* Call-to-Action Button */}
         <Button
           onClick={handleStartReading}
-          className="w-full py-6 text-lg font-semibold bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-2xl shadow-md transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full py-5 text-lg font-semibold bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-2xl shadow-md transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
           style={{ boxShadow: "0 4px 12px rgba(255, 193, 7, 0.3)" }}
         >
           <BookOpen className="w-6 h-6 mr-3" />📖 Start Reading Now

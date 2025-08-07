@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Clock, Target, Trophy, Star, Calendar, FileText, Share2 } from "lucide-react"
+import { BookOpen, Clock, Target, Trophy, Star, Calendar, FileText, Share2 } from 'lucide-react'
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ViewBookNotesModal } from "./view-book-notes-modal"
@@ -144,22 +144,22 @@ export function MobileAchievementsContent() {
   }
 
   return (
-    <div className="px-4 space-y-6">
+    <div className="px-4 space-y-8">
       {/* Header */}
-      <div className="text-center pt-2">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Your Achievements 🏆</h1>
+      <div className="text-center pt-4">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Achievements 🏆</h1>
         <p className="text-gray-600 text-base">Celebrate your reading journey and milestones</p>
       </div>
 
       {/* Stats Overview */}
       <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-        <CardContent className="p-5 text-center">
+        <CardContent className="p-6 text-center">
           <div className="flex items-center justify-center gap-4 mb-4">
             <BookOpen className="w-8 h-8 text-[#4CAF50]" />
             <div className="text-4xl font-bold text-gray-900">{totalBooks}</div>
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Books Completed</h2>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-2 gap-4 mt-5">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{Math.round(totalHours)}h</div>
               <div className="text-sm text-gray-600">Total Reading Time</div>
@@ -169,7 +169,7 @@ export function MobileAchievementsContent() {
               <div className="text-sm text-gray-600">Current Streak</div>
             </div>
           </div>
-          <p className="text-gray-600 italic mt-4 text-sm leading-relaxed">
+          <p className="text-gray-600 italic mt-5 text-sm leading-relaxed">
             "A reader lives a thousand lives before he dies. The man who never reads lives only one." - George R.R.
             Martin
           </p>
@@ -178,7 +178,7 @@ export function MobileAchievementsContent() {
 
       {/* Achievements */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-5">
           <Trophy className="w-5 h-5 text-yellow-500" />
           <h2 className="text-lg font-semibold text-gray-900">Achievements Unlocked</h2>
         </div>
@@ -186,10 +186,10 @@ export function MobileAchievementsContent() {
         <div className="grid grid-cols-2 gap-3">
           {mockAchievements.map((achievement) => (
             <Card key={achievement.id} className="bg-white border-yellow-200">
-              <CardContent className="p-4 text-center">
-                <div className="text-3xl mb-2">{achievement.icon}</div>
-                <h3 className="font-semibold text-gray-900 text-sm mb-1">{achievement.title}</h3>
-                <p className="text-xs text-gray-600 mb-2 leading-relaxed">{achievement.description}</p>
+              <CardContent className="p-5 text-center">
+                <div className="text-3xl mb-3">{achievement.icon}</div>
+                <h3 className="font-semibold text-gray-900 text-sm mb-2">{achievement.title}</h3>
+                <p className="text-xs text-gray-600 mb-3 leading-relaxed">{achievement.description}</p>
                 <Badge variant="secondary" className="text-xs">
                   {formatDate(achievement.unlockedAt)}
                 </Badge>
@@ -201,16 +201,16 @@ export function MobileAchievementsContent() {
 
       {/* Completed Books */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-5">
           <BookOpen className="w-5 h-5 text-[#4CAF50]" />
           <h2 className="text-lg font-semibold text-gray-900">Reading History</h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {mockCompletedBooks.map((book) => (
             <Card key={book.id} className="bg-white">
-              <CardContent className="p-5">
-                <div className="mb-3">
+              <CardContent className="p-6">
+                <div className="mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">{book.title}</h3>
                   <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
 
@@ -231,7 +231,7 @@ export function MobileAchievementsContent() {
                   </div>
                 </div>
 
-                <div className="border-l-4 border-[#4CAF50] pl-4 mb-4">
+                <div className="border-l-4 border-[#4CAF50] pl-4 mb-5">
                   <div className="flex items-center gap-2 mb-2">
                     <Target className="w-4 h-4 text-gray-500" />
                     <span className="text-sm font-medium text-gray-700">My Reflection</span>

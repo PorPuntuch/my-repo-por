@@ -5,19 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import {
-  BookOpen,
-  Clock,
-  Calendar,
-  Flame,
-  Flag,
-  Play,
-  FileText,
-  MoreHorizontal,
-  Plus,
-  Edit,
-  Trash2,
-} from "lucide-react"
+import { BookOpen, Clock, Calendar, Flame, Flag, Play, FileText, MoreHorizontal, Plus, Edit, Trash2 } from 'lucide-react'
 import { ChangeScheduleModal } from "./change-schedule-modal"
 import { CreateGoalModal } from "./create-goal-modal"
 import { ViewNotesModal } from "./view-notes-modal"
@@ -155,15 +143,15 @@ export function MobileGoalsContent() {
   }
 
   return (
-    <div className="px-4 space-y-6">
+    <div className="px-4 space-y-8">
       {/* Header */}
-      <div className="text-center pt-2">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Your Reading Goals 🎯</h1>
-        <p className="text-gray-600 text-base mb-4">Track your progress and build lasting habits</p>
+      <div className="text-center pt-4">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Reading Goals 🎯</h1>
+        <p className="text-gray-600 text-base mb-6">Track your progress and build lasting habits</p>
       </div>
 
       {/* Create New Goal Button - Top Placement */}
-      <div className="flex flex-col items-center mb-6">
+      <div className="flex flex-col items-center mb-8">
         <Button
           onClick={handleCreateNewGoal}
           className="bg-[#4CAF50] hover:bg-[#45a049] text-white font-semibold py-4 px-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 min-h-[56px]"
@@ -174,7 +162,7 @@ export function MobileGoalsContent() {
         </Button>
 
         {/* Microcopy */}
-        <p className="text-sm text-gray-500 mt-2 italic">Set a new reading goal to stay consistent 📚</p>
+        <p className="text-sm text-gray-500 mt-3 italic">Set a new reading goal to stay consistent 📚</p>
       </div>
 
       {/* Goals List */}
@@ -186,9 +174,9 @@ export function MobileGoalsContent() {
               className="border-2 border-blue-200 bg-white shadow-sm"
               style={{ borderRadius: "16px" }}
             >
-              <CardContent className="p-5">
+              <CardContent className="p-6">
                 {/* Header */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-5">
                   <h3 className="text-lg font-bold text-gray-900 flex-1 pr-2">{goal.title}</h3>
                   <Badge
                     variant={goal.status === "active" ? "default" : "secondary"}
@@ -203,7 +191,7 @@ export function MobileGoalsContent() {
                 </div>
 
                 {/* Book Info */}
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-3 mb-4">
                   <BookOpen className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <span className="text-gray-700 font-medium text-sm">
                     {goal.bookTitle} by {goal.bookAuthor}
@@ -211,7 +199,7 @@ export function MobileGoalsContent() {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-purple-600" />
                     <span className="text-gray-700 text-sm">{formatDuration(goal.duration, goal.durationUnit)}</span>
@@ -231,7 +219,7 @@ export function MobileGoalsContent() {
                 </div>
 
                 {/* Weekly Progress */}
-                <div className="mb-5">
+                <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-700 font-medium text-sm">Weekly Progress</span>
                     <span className="text-[#4CAF50] font-semibold text-sm">
@@ -317,7 +305,7 @@ export function MobileGoalsContent() {
 
       {/* Floating Action Button */}
       <Button
-        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-[#4CAF50] hover:bg-[#45a049] text-white shadow-lg z-40 transition-all duration-200 transform hover:scale-110 active:scale-95"
+        className="fixed bottom-28 right-6 w-14 h-14 rounded-full bg-[#4CAF50] hover:bg-[#45a049] text-white shadow-lg z-40 transition-all duration-200 transform hover:scale-110 active:scale-95"
         onClick={handleCreateNewGoal}
       >
         <Plus className="w-6 h-6" />

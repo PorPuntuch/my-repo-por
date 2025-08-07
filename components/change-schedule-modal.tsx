@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Clock, Info, X } from "lucide-react"
+import { Clock, Info, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Goal {
@@ -115,9 +115,9 @@ export function ChangeScheduleModal({ isOpen, onClose, goal, onSave }: ChangeSch
             </Button>
           </DialogHeader>
 
-          <div className="space-y-6 mt-4">
+          <div className="space-y-7 mt-5">
             {/* Goal Info */}
-            <div className="bg-gray-50 rounded-lg p-3">
+            <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="font-medium text-gray-900 text-sm">{goal.title}</h3>
               <p className="text-sm text-gray-600">
                 {goal.bookTitle} by {goal.bookAuthor}
@@ -125,11 +125,11 @@ export function ChangeScheduleModal({ isOpen, onClose, goal, onSave }: ChangeSch
             </div>
 
             {/* Reading Days Selector */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Label className="text-base font-medium">Which days do you want to read?</Label>
               <p className="text-sm text-gray-600">Choose the days that work best for you!</p>
 
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-2">
                 {DAYS_OF_WEEK.map((day) => {
                   const isSelected = selectedDays.includes(day.id)
                   return (
@@ -152,10 +152,10 @@ export function ChangeScheduleModal({ isOpen, onClose, goal, onSave }: ChangeSch
             </div>
 
             {/* Daily Reading Duration */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Label className="text-base font-medium">How long do you want to read each day?</Label>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <Input
                     type="number"
@@ -180,7 +180,7 @@ export function ChangeScheduleModal({ isOpen, onClose, goal, onSave }: ChangeSch
             </div>
 
             {/* Start Time (Optional) */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Label className="text-base font-medium">Preferred reading time (optional)</Label>
                 <Tooltip>
@@ -205,7 +205,7 @@ export function ChangeScheduleModal({ isOpen, onClose, goal, onSave }: ChangeSch
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-4 pt-6">
               <Button variant="outline" onClick={handleCancel} className="flex-1 bg-transparent min-h-[44px]">
                 Cancel
               </Button>

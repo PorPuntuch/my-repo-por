@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronRight, User, Bell, BookOpen, Palette, Database, FileText, LogOut, Shield } from "lucide-react"
+import { ChevronRight, User, Bell, BookOpen, Palette, Database, FileText, LogOut, Shield } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
@@ -30,16 +30,16 @@ export function MobileSettingsContent() {
   const [email, setEmail] = useState("john@example.com")
 
   return (
-    <div className="p-4 space-y-6 pb-20">
+    <div className="p-4 space-y-7 pb-24">
       {/* Account Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <User className="w-5 h-5" />
             Account
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
@@ -63,13 +63,13 @@ export function MobileSettingsContent() {
 
       {/* Notifications Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Bell className="w-5 h-5" />
             Notifications
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Daily Coach Messages</p>
@@ -77,7 +77,7 @@ export function MobileSettingsContent() {
             </div>
             <Switch checked={dailyCoach} onCheckedChange={setDailyCoach} />
           </div>
-          <Separator />
+          <Separator className="my-2" />
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Reading Reminder Pop-up</p>
@@ -90,7 +90,7 @@ export function MobileSettingsContent() {
 
       {/* Reading Preferences Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <BookOpen className="w-5 h-5" />
             Reading Preferences
@@ -118,7 +118,7 @@ export function MobileSettingsContent() {
 
       {/* App Appearance Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Palette className="w-5 h-5" />
             App Appearance
@@ -137,13 +137,13 @@ export function MobileSettingsContent() {
 
       {/* Data Control Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Database className="w-5 h-5" />
             Data Control
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="w-full justify-between bg-transparent">
@@ -194,13 +194,13 @@ export function MobileSettingsContent() {
 
       {/* Export Data Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <FileText className="w-5 h-5" />
             Export Data
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <Button variant="outline" className="w-full justify-between bg-transparent">
             Export as CSV
             <ChevronRight className="w-4 h-4" />
@@ -214,13 +214,13 @@ export function MobileSettingsContent() {
 
       {/* Legal Section */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Shield className="w-5 h-5" />
             Legal
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <Button variant="outline" className="w-full justify-between bg-transparent">
             Terms of Service
             <ChevronRight className="w-4 h-4" />

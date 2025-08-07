@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { BookOpen, Clock, X } from "lucide-react"
+import { BookOpen, Clock, X } from 'lucide-react'
 
 interface Book {
   id: number
@@ -84,7 +84,7 @@ export function BookSelectionModal({ isOpen, onClose, onSelectBook }: BookSelect
           </Button>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="space-y-5 mt-5">
           <p className="text-gray-600 text-sm">Select a book from your active goals to start reading:</p>
 
           {mockBooks.map((book) => {
@@ -99,8 +99,8 @@ export function BookSelectionModal({ isOpen, onClose, onSelectBook }: BookSelect
                 }`}
                 onClick={() => handleBookSelect(book)}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3">
                     {/* Book Cover */}
                     <div
                       className={`w-12 h-16 ${book.coverColor} rounded-lg flex items-center justify-center flex-shrink-0`}
@@ -115,8 +115,8 @@ export function BookSelectionModal({ isOpen, onClose, onSelectBook }: BookSelect
                       <p className="text-xs text-gray-500 mt-1">From: {book.goalTitle}</p>
 
                       {/* Progress */}
-                      <div className="mt-2">
-                        <div className="flex justify-between items-center text-xs text-gray-600 mb-1">
+                      <div className="mt-3">
+                        <div className="flex justify-between items-center text-xs text-gray-600 mb-2">
                           <span>Progress</span>
                           <span>{progress}%</span>
                         </div>
@@ -142,7 +142,7 @@ export function BookSelectionModal({ isOpen, onClose, onSelectBook }: BookSelect
           })}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-4 pt-5">
             <Button variant="outline" onClick={handleClose} className="flex-1 bg-transparent min-h-[44px]">
               Cancel
             </Button>
