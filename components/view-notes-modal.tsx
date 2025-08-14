@@ -3,23 +3,35 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Edit, Trash2, Plus, Save, X, Calendar, FileText } from "lucide-react"
-
-interface Note {
-  id: number
-  date: string
-  content: string
-  goalId: number
-}
+import { BookOpen, Calendar, Clock, X, Edit, Save, Plus, Trash2 } from "lucide-react"
 
 interface Goal {
   id: number
   title: string
   bookTitle: string
   bookAuthor: string
+  duration: number
+  durationUnit: "minutes" | "hours"
+  days: string[]
+  preferredTime?: string
+  status: "active" | "paused" | "completed"
+  streak: number
+  daysLeft: number
+  weeklyProgress: { completed: number; total: number }
+  todaysMission?: string
+  aiCoachMessage?: string
+  hasScheduleToday?: boolean
+}
+
+interface Note {
+  id: number
+  date: string
+  content: string
+  pages?: string
+  timeSpent?: number
 }
 
 interface ViewNotesModalProps {
@@ -37,42 +49,30 @@ interface ExpandedNoteModalProps {
   onDelete: (noteId: number) => void
 }
 
-// Mock notes data - in a real app, this would come from your data store
 const mockNotes: Note[] = [
   {
     id: 1,
-    date: "2024-01-29",
+    date: "2024-01-15",
     content:
-      "Started reading Chapter 1 today. The concept of atomic habits is fascinating - small changes compound over time. James Clear's writing style is very engaging and practical.",
-    goalId: 1,
+      "Great insights about habit formation. The 1% better concept really resonates with me. Started implementing the habit stacking technique.",
+    pages: "Pages 45-60",
+    timeSpent: 30,
   },
   {
     id: 2,
-    date: "2024-01-28",
+    date: "2024-01-14",
     content:
-      "Finished the introduction. Love the story about the British cycling team and how 1% improvements led to Olympic gold. This mindset shift could apply to my own habits.",
-    goalId: 1,
+      "The four laws of behavior change are fascinating: Make it obvious, attractive, easy, and satisfying. Need to apply this to my reading habit.",
+    pages: "Pages 30-44",
+    timeSpent: 25,
   },
   {
     id: 3,
-    date: "2024-01-27",
+    date: "2024-01-13",
     content:
-      "Just started this book. Excited to learn about building better habits. The four laws of behavior change mentioned in the preview look promising.",
-    goalId: 1,
-  },
-  {
-    id: 4,
-    date: "2024-01-26",
-    content:
-      "Incredible insights about human evolution and cognitive revolution. Harari's perspective on how language shaped our species is mind-blowing.",
-    goalId: 2,
-  },
-  {
-    id: 5,
-    date: "2024-01-25",
-    content:
-      "The agricultural revolution chapter was dense but fascinating. Never thought about how farming changed human society so fundamentally.",
-    goalId: 2,
+      "Identity-based habits vs outcome-based habits - this is a game changer. Focus on becoming the type of person who reads daily.",
+    pages: "Pages 15-29",
+    timeSpent: 35,
   },
 ]
 
@@ -195,17 +195,17 @@ function ExpandedNoteModal({ isOpen, onClose, note, goal, onSave, onDelete }: Ex
 
 export function ViewNotesModal({ isOpen, onClose, goal }: ViewNotesModalProps) {
   const [notes, setNotes] = useState<Note[]>(mockNotes)
-  const [editingNoteId, setEditingNoteId] = useState<number | null>(null)
-  const [editContent, setEditContent] = useState("")
-  const [isAddingNote, setIsAddingNote] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [newNoteContent, setNewNoteContent] = useState("")
+  const [isAddingNote, setIsAddingNote] = useState(false)
   const [expandedNote, setExpandedNote] = useState<Note | null>(null)
   const [isExpandedModalOpen, setIsExpandedModalOpen] = useState(false)
 
   if (!goal) return null
 
   const goalNotes = notes
-    .filter((note) => note.goalId === goal.id)
+    .filter((note) => note.id === goal.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   const formatDate = (dateString: string) => {
@@ -219,23 +219,20 @@ export function ViewNotesModal({ isOpen, onClose, goal }: ViewNotesModalProps) {
   }
 
   const handleEditNote = (note: Note) => {
-    setEditingNoteId(note.id)
-    setEditContent(note.content)
+    setEditingNote(note)
+    setNewNoteContent(note.content)
+    setIsEditing(true)
   }
 
-  const handleSaveEdit = (noteId: number) => {
-    setNotes((prev) => prev.map((note) => (note.id === noteId ? { ...note, content: editContent } : note)))
-    setEditingNoteId(null)
-    setEditContent("")
-  }
-
-  const handleCancelEdit = () => {
-    setEditingNoteId(null)
-    setEditContent("")
-  }
-
-  const handleDeleteNote = (noteId: number) => {
-    setNotes((prev) => prev.filter((note) => note.id !== noteId))
+  const handleSaveNote = () => {
+    if (editingNote && newNoteContent.trim()) {
+      setNotes((prev) =>
+        prev.map((note) => (note.id === editingNote.id ? { ...note, content: newNoteContent.trim() } : note)),
+      )
+      setIsEditing(false)
+      setEditingNote(null)
+      setNewNoteContent("")
+    }
   }
 
   const handleAddNote = () => {
@@ -244,7 +241,7 @@ export function ViewNotesModal({ isOpen, onClose, goal }: ViewNotesModalProps) {
         id: Math.max(...notes.map((n) => n.id), 0) + 1,
         date: new Date().toISOString().split("T")[0],
         content: newNoteContent.trim(),
-        goalId: goal.id,
+        timeSpent: 0,
       }
       setNotes((prev) => [newNote, ...prev])
       setNewNoteContent("")
@@ -252,9 +249,15 @@ export function ViewNotesModal({ isOpen, onClose, goal }: ViewNotesModalProps) {
     }
   }
 
-  const handleCancelAdd = () => {
-    setIsAddingNote(false)
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setEditingNote(null)
     setNewNoteContent("")
+    setIsAddingNote(false)
+  }
+
+  const handleDeleteNote = (noteId: number) => {
+    setNotes((prev) => prev.filter((note) => note.id !== noteId))
   }
 
   const handleExpandNote = (note: Note) => {
@@ -280,143 +283,149 @@ export function ViewNotesModal({ isOpen, onClose, goal }: ViewNotesModalProps) {
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-md mx-auto h-[90vh] flex flex-col p-0">
-          <DialogHeader className="p-6 pb-4 border-b">
-            <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              Reading Notes
-            </DialogTitle>
-            <div className="text-sm text-gray-600 mt-2">
-              <strong>{goal.bookTitle}</strong> by {goal.bookAuthor}
+          <DialogHeader className="p-5 pb-4 border-b">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-[#4CAF50]" />
+                Reading Notes
+              </DialogTitle>
+              <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Book Info */}
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-gray-900 text-base">{goal.bookTitle}</h3>
+              <p className="text-sm text-gray-600">by {goal.bookAuthor}</p>
+              <div className="flex items-center gap-4 mt-2">
+                <Badge variant="secondary" className="text-xs">
+                  {goal.status === "completed" ? "Completed" : "In Progress"}
+                </Badge>
+                {goal.status === "completed" && (
+                  <span className="text-xs text-green-600 font-medium">🎉 Goal completed!</span>
+                )}
+              </div>
             </div>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-col min-h-0">
+          <ScrollArea className="flex-1 p-5">
             {/* Add Note Button */}
-            <div className="p-4 border-b">
-              {!isAddingNote ? (
-                <Button
-                  onClick={() => setIsAddingNote(true)}
-                  className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white min-h-[44px]"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add New Note
-                </Button>
-              ) : (
-                <div className="space-y-3">
-                  <Textarea
-                    placeholder="Write your reading note here..."
-                    value={newNoteContent}
-                    onChange={(e) => setNewNoteContent(e.target.value)}
-                    className="min-h-[100px] resize-none"
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleAddNote}
-                      disabled={!newNoteContent.trim()}
-                      className="flex-1 bg-[#4CAF50] hover:bg-[#45a049] text-white min-h-[44px]"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Note
-                    </Button>
-                    <Button onClick={handleCancelAdd} variant="outline" className="flex-1 min-h-[44px] bg-transparent">
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
+            {!isAddingNote && !isEditing && (
+              <Button
+                onClick={() => setIsAddingNote(true)}
+                className="w-full mb-6 bg-[#4CAF50] hover:bg-[#45a049] text-white font-medium py-3 rounded-2xl"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Note
+              </Button>
+            )}
+
+            {/* Add New Note Form */}
+            {isAddingNote && (
+              <div className="mb-6 p-4 border-2 border-[#4CAF50] rounded-2xl bg-green-50">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="w-4 h-4 text-[#4CAF50]" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {formatDate(new Date().toISOString().split("T")[0])}
+                  </span>
                 </div>
-              )}
-            </div>
+                <Textarea
+                  value={newNoteContent}
+                  onChange={(e) => setNewNoteContent(e.target.value)}
+                  placeholder="What did you learn or think about while reading today?"
+                  className="min-h-[100px] resize-none border-0 bg-white"
+                />
+                <div className="flex gap-3 mt-3">
+                  <Button
+                    onClick={handleAddNote}
+                    disabled={!newNoteContent.trim()}
+                    className="flex-1 bg-[#4CAF50] hover:bg-[#45a049] text-white"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Note
+                  </Button>
+                  <Button onClick={handleCancelEdit} variant="outline" className="flex-1 bg-transparent">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Notes List */}
-            <ScrollArea className="flex-1 p-4">
-              {goalNotes.length > 0 ? (
-                <div className="space-y-4">
-                  {goalNotes.map((note) => (
-                    <Card key={note.id} className="border border-gray-200">
-                      <CardContent className="p-4">
-                        {/* Date Header */}
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="w-4 h-4" />
-                            {formatDate(note.date)}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              onClick={() => handleEditNote(note)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-gray-100"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              onClick={() => handleDeleteNote(note.id)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
+            <div className="space-y-4">
+              {notes.length > 0 ? (
+                notes.map((note) => (
+                  <div key={note.id} className="p-4 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700">{formatDate(note.date)}</span>
+                      </div>
+                      <Button
+                        onClick={() => handleEditNote(note)}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                    </div>
 
-                        {/* Note Content */}
-                        {editingNoteId === note.id ? (
-                          <div className="space-y-3">
-                            <Textarea
-                              value={editContent}
-                              onChange={(e) => setEditContent(e.target.value)}
-                              className="min-h-[80px] resize-none"
-                            />
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={() => handleSaveEdit(note.id)}
-                                size="sm"
-                                className="bg-[#4CAF50] hover:bg-[#45a049] text-white"
-                              >
-                                <Save className="w-3 h-3 mr-1" />
-                                Save
-                              </Button>
-                              <Button onClick={handleCancelEdit} variant="outline" size="sm">
-                                <X className="w-3 h-3 mr-1" />
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className="cursor-pointer hover:bg-gray-50 -m-2 p-2 rounded transition-colors"
-                            onClick={() => handleExpandNote(note)}
+                    {isEditing && editingNote?.id === note.id ? (
+                      <div className="space-y-3">
+                        <Textarea
+                          value={newNoteContent}
+                          onChange={(e) => setNewNoteContent(e.target.value)}
+                          className="min-h-[100px] resize-none"
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleSaveNote}
+                            size="sm"
+                            className="bg-[#4CAF50] hover:bg-[#45a049] text-white"
                           >
-                            <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">{note.content}</p>
-                            {note.content.length > 150 && (
-                              <p className="text-xs text-blue-600 mt-2 font-medium">Click to read more...</p>
+                            <Save className="w-3 h-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button onClick={handleCancelEdit} variant="outline" size="sm">
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-gray-700 text-sm leading-relaxed mb-3">{note.content}</p>
+
+                        {(note.pages || note.timeSpent) && (
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            {note.pages && (
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-3 h-3" />
+                                {note.pages}
+                              </span>
+                            )}
+                            {note.timeSpent && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {note.timeSpent} min
+                              </span>
                             )}
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                /* Empty State */
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-8 h-8 text-gray-400" />
+                      </>
+                    )}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No notes yet</h3>
-                  <p className="text-gray-600 mb-6">Start adding notes about your reading progress!</p>
-                  <Button
-                    onClick={() => setIsAddingNote(true)}
-                    className="bg-[#4CAF50] hover:bg-[#45a049] text-white min-h-[44px]"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Note
-                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No notes yet</h3>
+                  <p className="text-gray-500 text-sm">Start taking notes about your reading journey!</p>
                 </div>
               )}
-            </ScrollArea>
-          </div>
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 

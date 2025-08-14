@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { BookOpen, Clock, Calendar, Flame, Flag, Play, FileText, MoreHorizontal, Plus, Edit, Trash2 } from 'lucide-react'
+import { BookOpen, FileText, MoreHorizontal, Plus, Edit, Trash2, CheckCircle, Target, Sparkles } from "lucide-react"
 import { ChangeScheduleModal } from "./change-schedule-modal"
 import { CreateGoalModal } from "./create-goal-modal"
 import { ViewNotesModal } from "./view-notes-modal"
@@ -19,10 +19,13 @@ interface Goal {
   durationUnit: "minutes" | "hours"
   days: string[]
   preferredTime?: string
-  status: "active" | "paused"
+  status: "active" | "paused" | "completed"
   streak: number
   daysLeft: number
   weeklyProgress: { completed: number; total: number }
+  todaysMission?: string
+  aiCoachMessage?: string
+  hasScheduleToday?: boolean
 }
 
 const mockGoals: Goal[] = [
@@ -39,6 +42,9 @@ const mockGoals: Goal[] = [
     streak: 5,
     daysLeft: 12,
     weeklyProgress: { completed: 4, total: 5 },
+    todaysMission: "Read 15 pages",
+    aiCoachMessage: "You're on fire! 🔥 Keep this momentum going to build a lasting habit.",
+    hasScheduleToday: true,
   },
   {
     id: 2,
@@ -52,6 +58,9 @@ const mockGoals: Goal[] = [
     streak: 3,
     daysLeft: 8,
     weeklyProgress: { completed: 2, total: 2 },
+    todaysMission: "Not scheduled for today",
+    aiCoachMessage: "Great progress this week! Take a well-deserved break today. 📚",
+    hasScheduleToday: false,
   },
   {
     id: 3,
@@ -61,10 +70,13 @@ const mockGoals: Goal[] = [
     duration: 45,
     durationUnit: "minutes",
     days: ["monday", "wednesday", "friday", "sunday"],
-    status: "paused",
-    streak: 0,
-    daysLeft: 15,
-    weeklyProgress: { completed: 0, total: 4 },
+    status: "completed",
+    streak: 21,
+    daysLeft: 0,
+    weeklyProgress: { completed: 4, total: 4 },
+    todaysMission: "Goal completed! 🎉",
+    aiCoachMessage: "Congratulations! You've finished this book. Ready for your next adventure?",
+    hasScheduleToday: false,
   },
 ]
 
@@ -75,29 +87,14 @@ export function MobileGoalsContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false)
 
-  const formatDays = (days: string[]) => {
-    const dayMap: { [key: string]: string } = {
-      monday: "Mon",
-      tuesday: "Tue",
-      wednesday: "Wed",
-      thursday: "Thu",
-      friday: "Fri",
-      saturday: "Sat",
-      sunday: "Sun",
+  const getStatusBadge = (status: Goal["status"]) => {
+    const statusConfig = {
+      active: { label: "In Progress", color: "bg-orange-100 text-orange-700 border-orange-200" },
+      paused: { label: "Paused", color: "bg-gray-100 text-gray-600 border-gray-200" },
+      completed: { label: "Completed", color: "bg-green-100 text-green-700 border-green-200" },
     }
 
-    if (days.length === 7) return "Daily"
-    if (days.length === 5 && !days.includes("saturday") && !days.includes("sunday")) return "Mon-Fri"
-    if (days.length === 2 && days.includes("saturday") && days.includes("sunday")) return "Sat-Sun"
-
-    return days.map((day) => dayMap[day]).join(", ")
-  }
-
-  const formatDuration = (duration: number, unit: "minutes" | "hours") => {
-    if (unit === "hours") {
-      return duration === 1 ? "1 hr/day" : `${duration} hrs/day`
-    }
-    return `${duration} min/day`
+    return statusConfig[status] || statusConfig.active
   }
 
   const handleCreateNewGoal = () => {
@@ -119,9 +116,9 @@ export function MobileGoalsContent() {
     setGoals((prev) => prev.filter((goal) => goal.id !== goalId))
   }
 
-  const handleStartReading = (goal: Goal) => {
-    console.log("Starting reading session for:", goal.title)
-    // Implement reading session logic
+  const handleCompleteToday = (goal: Goal) => {
+    console.log("Completing today's mission for:", goal.title)
+    // Implement completion logic
   }
 
   const handleViewNotes = (goal: Goal) => {
@@ -136,6 +133,9 @@ export function MobileGoalsContent() {
       status: "active",
       streak: 0,
       weeklyProgress: { completed: 0, total: newGoalData.days.length },
+      todaysMission: "Read 10 pages",
+      aiCoachMessage: "Welcome to your reading journey! Let's start building this habit together. 🌟",
+      hasScheduleToday: true,
     }
 
     setGoals((prev) => [newGoal, ...prev])
@@ -143,14 +143,14 @@ export function MobileGoalsContent() {
   }
 
   return (
-    <div className="px-4 space-y-8">
+    <div className="px-4 space-y-8 pb-32">
       {/* Header */}
       <div className="text-center pt-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Your Reading Goals 🎯</h1>
         <p className="text-gray-600 text-base mb-6">Track your progress and build lasting habits</p>
       </div>
 
-      {/* Create New Goal Button - Top Placement */}
+      {/* Create New Goal Button */}
       <div className="flex flex-col items-center mb-8">
         <Button
           onClick={handleCreateNewGoal}
@@ -160,130 +160,130 @@ export function MobileGoalsContent() {
           <Plus className="w-5 h-5 mr-2" />
           Create New Goal
         </Button>
-
-        {/* Microcopy */}
         <p className="text-sm text-gray-500 mt-3 italic">Set a new reading goal to stay consistent 📚</p>
       </div>
 
       {/* Goals List */}
       {goals.length > 0 ? (
-        <div className="space-y-4">
-          {goals.map((goal) => (
-            <Card
-              key={goal.id}
-              className="border-2 border-blue-200 bg-white shadow-sm"
-              style={{ borderRadius: "16px" }}
-            >
-              <CardContent className="p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-5">
-                  <h3 className="text-lg font-bold text-gray-900 flex-1 pr-2">{goal.title}</h3>
-                  <Badge
-                    variant={goal.status === "active" ? "default" : "secondary"}
-                    className={`${
-                      goal.status === "active"
-                        ? "bg-green-100 text-green-700 hover:bg-green-100"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {goal.status === "active" ? "Active" : "Paused"}
-                  </Badge>
-                </div>
+        <div className="space-y-6">
+          {goals.map((goal) => {
+            const statusBadge = getStatusBadge(goal.status)
 
-                {/* Book Info */}
-                <div className="flex items-center gap-3 mb-4">
-                  <BookOpen className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span className="text-gray-700 font-medium text-sm">
-                    {goal.bookTitle} by {goal.bookAuthor}
-                  </span>
-                </div>
+            return (
+              <Card key={goal.id} className="border-0 bg-white shadow-lg rounded-3xl overflow-hidden">
+                <CardContent className="p-0">
+                  {/* Header Section */}
+                  <div className="p-6 pb-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h2 className="text-xl font-bold text-gray-900 mb-1 leading-tight">{goal.bookTitle}</h2>
+                        <p className="text-sm font-medium text-gray-500">by {goal.bookAuthor}</p>
+                      </div>
+                      <Badge className={`${statusBadge.color} border font-medium px-3 py-1 rounded-full text-xs`}>
+                        {statusBadge.label}
+                      </Badge>
+                    </div>
+                  </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-purple-600" />
-                    <span className="text-gray-700 text-sm">{formatDuration(goal.duration, goal.durationUnit)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-blue-600" />
-                    <span className="text-gray-700 text-sm">{formatDays(goal.days)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-orange-500" />
-                    <span className="text-gray-700 text-sm">{goal.streak} day streak</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Flag className="w-4 h-4 text-green-600" />
-                    <span className="text-gray-700 text-sm">{goal.daysLeft} days left</span>
-                  </div>
-                </div>
-
-                {/* Weekly Progress */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-700 font-medium text-sm">Weekly Progress</span>
-                    <span className="text-[#4CAF50] font-semibold text-sm">
-                      {goal.weeklyProgress.completed}/{goal.weeklyProgress.total} days
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-[#4CAF50] h-3 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${(goal.weeklyProgress.completed / goal.weeklyProgress.total) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={() => handleStartReading(goal)}
-                      disabled={goal.status === "paused"}
-                      className="flex-1 bg-[#4CAF50] hover:bg-[#45a049] text-white disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                  {/* Mission Section */}
+                  <div className="px-6 py-4 bg-gray-50/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-4 h-4 text-[#4CAF50]" />
+                      <span className="text-sm font-semibold text-gray-700">Today's Mission</span>
+                    </div>
+                    <p
+                      className={`text-sm font-medium ${
+                        goal.hasScheduleToday
+                          ? "text-[#4CAF50]"
+                          : goal.status === "completed"
+                            ? "text-green-600"
+                            : "text-gray-500"
+                      }`}
                     >
-                      <Play className="w-4 h-4 mr-2" />📖 Start Reading
-                    </Button>
+                      {goal.todaysMission}
+                    </p>
+                  </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                  {/* AI Coach Message Section */}
+                  <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-blue-50 border-t border-purple-100/50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-700 leading-relaxed">{goal.aiCoachMessage}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Section */}
+                  <div className="p-6 pt-5">
+                    <div className="flex items-center gap-3">
+                      {goal.status !== "completed" && goal.hasScheduleToday && (
+                        <Button
+                          onClick={() => handleCompleteToday(goal)}
+                          className="flex-1 bg-[#4CAF50] hover:bg-[#45a049] text-white font-semibold py-3 px-4 rounded-2xl min-h-[48px] shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <CheckCircle className="w-5 h-5 mr-2" />
+                          Mark Complete
+                        </Button>
+                      )}
+
+                      {goal.status !== "completed" && !goal.hasScheduleToday && (
                         <Button
                           variant="outline"
-                          size="icon"
-                          className="border-gray-300 hover:bg-gray-50 bg-transparent min-w-[44px] min-h-[44px]"
+                          className="flex-1 border-2 border-gray-200 hover:bg-gray-50 text-gray-600 font-medium py-3 px-4 rounded-2xl min-h-[48px] bg-transparent"
+                          disabled
                         >
-                          <MoreHorizontal className="w-4 h-4" />
+                          No Mission Today
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditSchedule(goal)}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Change Schedule
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteGoal(goal.id)}
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete Goal
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                      )}
 
-                  <Button
-                    variant="outline"
-                    onClick={() => handleViewNotes(goal)}
-                    className="w-full border-gray-300 hover:bg-gray-50 min-h-[44px]"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />📝 View Notes
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                      {goal.status === "completed" && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleViewNotes(goal)}
+                          className="flex-1 border-2 border-green-200 hover:bg-green-50 text-green-700 font-medium py-3 px-4 rounded-2xl min-h-[48px]"
+                        >
+                          <FileText className="w-5 h-5 mr-2" />
+                          View Notes
+                        </Button>
+                      )}
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="border-2 border-gray-200 hover:bg-gray-50 bg-white min-w-[48px] min-h-[48px] rounded-2xl"
+                          >
+                            <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={() => handleEditSchedule(goal)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Change Schedule
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewNotes(goal)}>
+                            <FileText className="w-4 h-4 mr-2" />
+                            View Notes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteGoal(goal.id)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Goal
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       ) : (
         /* Empty State */
@@ -311,7 +311,7 @@ export function MobileGoalsContent() {
         <Plus className="w-6 h-6" />
       </Button>
 
-      {/* Change Schedule Modal */}
+      {/* Modals */}
       <ChangeScheduleModal
         isOpen={isScheduleModalOpen}
         onClose={() => {
@@ -322,7 +322,6 @@ export function MobileGoalsContent() {
         onSave={handleSaveSchedule}
       />
 
-      {/* Create Goal Modal */}
       <CreateGoalModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -330,7 +329,6 @@ export function MobileGoalsContent() {
         existingGoals={goals}
       />
 
-      {/* View Notes Modal */}
       <ViewNotesModal
         isOpen={isNotesModalOpen}
         onClose={() => {

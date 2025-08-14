@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Clock, Info, X } from 'lucide-react'
+import { Clock, Info, X } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Goal {
@@ -18,10 +18,13 @@ interface Goal {
   durationUnit: "minutes" | "hours"
   days: string[]
   preferredTime?: string
-  status: "active" | "paused"
+  status: "active" | "paused" | "completed"
   streak: number
   daysLeft: number
   weeklyProgress: { completed: number; total: number }
+  todaysMission?: string
+  aiCoachMessage?: string
+  hasScheduleToday?: boolean
 }
 
 interface ChangeScheduleModalProps {

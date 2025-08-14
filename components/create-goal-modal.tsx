@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { BookOpen, Clock, CalendarIcon, ChevronLeft, ChevronRight, AlertCircle, Check, Search } from 'lucide-react'
+import { BookOpen, Clock, CalendarIcon, ChevronLeft, ChevronRight, AlertCircle, Check, Search } from "lucide-react"
 import { format } from "date-fns"
 
 interface Goal {
@@ -23,10 +23,13 @@ interface Goal {
   durationUnit: "minutes" | "hours"
   days: string[]
   preferredTime?: string
-  status: "active" | "paused"
+  status: "active" | "paused" | "completed"
   streak: number
   daysLeft: number
   weeklyProgress: { completed: number; total: number }
+  todaysMission?: string
+  aiCoachMessage?: string
+  hasScheduleToday?: boolean
 }
 
 interface CreateGoalModalProps {
